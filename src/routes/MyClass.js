@@ -8,6 +8,7 @@ const MyClass = props => {
                 My Classes Page
         </div>
             <Link to="/">Home</Link>
+            <Link to='/my-class/new'>Add New Class</Link>
         </>
     )
 }

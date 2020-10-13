@@ -21,7 +21,6 @@ function App() {
       setInit(true);
     });
   }, []);
-
   return (
     <>
       <div>
