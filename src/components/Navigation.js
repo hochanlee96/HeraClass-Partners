@@ -1,13 +1,13 @@
 import React from 'react';
-// import { useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { authService } from '../fbase';
 
 const Navigation = props => {
 
-    // const history = useHistory();
+    const history = useHistory();
     const logOutClick = () => {
         authService.signOut();
-        // history.push("/");
+        history.push("/");
     };
     return (
         <>

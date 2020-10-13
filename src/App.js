@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AppRouter from './components/Router';
+import { BrowserRouter } from 'react-router-dom';
 import { authService } from './fbase';
 
 function App() {
@@ -26,7 +27,9 @@ function App() {
       <div>
         This is the HeraClass Partners Page
     </div>
-      {init ? <AppRouter isLoggedIn={Boolean(userObj)} userObj={userObj} /> : "initializing..."}
+      <BrowserRouter>
+        {init ? <AppRouter isLoggedIn={Boolean(userObj)} userObj={userObj} /> : "initializing..."}
+      </BrowserRouter>
     </>
   );
 }

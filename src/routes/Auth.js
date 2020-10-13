@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { authService } from "../fbase";
+import { authService, dbService } from "../fbase";
 
 const Auth = props => {
 
     const history = useHistory();
 
     const [emailInput, setEmailInput] = useState('');
+    const [usernameInput, setUsernameInput] = useState('');
     const [passwordInput, setPasswordInput] = useState('');
     const [isLogin, setIsLogin] = useState(true);
     const [error, setError] = useState('');
@@ -14,6 +15,8 @@ const Auth = props => {
     const onInputChange = event => {
         if (event.target.name === "email") {
             setEmailInput(event.target.value)
+        } else if (event.target.name === "username") {
+            setUsernameInput(event.target.value)
         } else if (event.target.name === 'password') {
             setPasswordInput(event.target.value)
         }
@@ -28,10 +31,17 @@ const Auth = props => {
                     emailInput,
                     passwordInput
                 );
+                const userId = data.user.uid;
+                dbService.collection("partners").doc(`${userId}`).set({ username: usernameInput })
             } else {
                 data = await authService.signInWithEmailAndPassword(emailInput, passwordInput);
+                const userId = data.user.uid;
+                const isPartner = await dbService.collection("parnters").doc(`${userId}`).get().then(user => user);
+                if (!isPartner) {
+                    authService.signOut();
+                    setError("Not a Partner!");
+                }
             }
-            console.log(data);
             history.push('/');
         } catch (error) {
             setError(error.message);
@@ -41,6 +51,7 @@ const Auth = props => {
 
     const LogInOrSignUp = () => {
         setIsLogin(prev => !prev)
+        setUsernameInput('');
     }
     return (
         <>
@@ -51,6 +62,7 @@ const Auth = props => {
             {error ? <p>{error}</p> : null}
             <form onSubmit={onSubmit}>
                 <input type="email" required placeholder="Email" value={emailInput} name="email" onChange={onInputChange} />
+                {isLogin ? null : <input type="text" required placeholder="Username" value={usernameInput} name="username" onChange={onInputChange} />}
                 <input type="password" required placeholder="Password" value={passwordInput} name="password" onChange={onInputChange} />
                 <input type="submit" />
             </form>

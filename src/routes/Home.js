@@ -7,7 +7,8 @@ const Home = props => {
             <div>
                 Home Page
         </div>
-            <Link to='/my-gym'>My Gym</Link>
+            <Link to='/my-class'>My Class</Link>
+            <Link to='/my-class/new'>Add New Class</Link>
         </>
     )
 }

@@ -1,14 +1,15 @@
 import React from "react";
-import { HashRouter as Router, Route, Switch } from "react-router-dom";
+import { withRouter, Route, Switch } from "react-router-dom";
 import Auth from '../routes/Auth';
 import Home from '../routes/Home';
 import Landing from '../routes/Landing';
 import Navigation from './Navigation';
-import MyGym from '../routes/MyGym';
+import MyClass from '../routes/MyClass';
+import NewClass from '../routes/NewClass';
 
 const AppRouter = ({ isLoggedIn, userObj }) => {
     return (
-        <Router>
+        <>
             {isLoggedIn && <Navigation userObj={userObj} />}
             <Switch>
                 {isLoggedIn ? (
@@ -16,8 +17,11 @@ const AppRouter = ({ isLoggedIn, userObj }) => {
                         <Route exact path="/">
                             <Home userObj={userObj} />
                         </Route>
-                        <Route exact path="/my-gym">
-                            <MyGym userObj={userObj} />
+                        <Route exact path="/my-class">
+                            <MyClass userObj={userObj} />
+                        </Route>
+                        <Route exact path="/my-class/new">
+                            <NewClass userObj={userObj} />
                         </Route>
                     </>
                 ) : (
@@ -31,7 +35,7 @@ const AppRouter = ({ isLoggedIn, userObj }) => {
                         </>
                     )}
             </Switch>
-        </Router>
+        </>
     );
 };
-export default AppRouter;
+export default withRouter(AppRouter);

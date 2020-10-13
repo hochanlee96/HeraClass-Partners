@@ -1,15 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const MyGym = props => {
+const MyClass = props => {
     return (
         <>
             <div>
-                My Gym Page
+                My Classes Page
         </div>
             <Link to="/">Home</Link>
         </>
     )
 }
 
-export default MyGym;
+export default MyClass;
