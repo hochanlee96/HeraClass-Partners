@@ -6,6 +6,8 @@ import Landing from '../routes/Landing';
 import Navigation from './Navigation';
 import MyClass from '../routes/MyClass';
 import NewClass from '../routes/NewClass';
+import ClassDetail from '../routes/ClassDetail';
+import EditClass from '../routes/EditClass';
 
 const AppRouter = ({ isLoggedIn, userObj }) => {
     return (
@@ -22,6 +24,12 @@ const AppRouter = ({ isLoggedIn, userObj }) => {
                         </Route>
                         <Route exact path="/my-class/new">
                             <NewClass userObj={userObj} />
+                        </Route>
+                        <Route exact path="/my-class/:id">
+                            <ClassDetail userObj={userObj} />
+                        </Route>
+                        <Route exact path="/my-class/:id/edit">
+                            <EditClass userObj={userObj} />
                         </Route>
                     </>
                 ) : (
