@@ -26,7 +26,14 @@ const ClassDetail = ({ userObj }) => {
     }, [classId, fetchClass])
 
     const toEditClass = () => {
-        history.push(`/my-class/${classId}/edit`)
+        history.push(`/my-class/${classId}/edit`);
+    }
+
+    const deleteClass = async () => {
+        if (classId) {
+            await dbService.collection('classes').doc(`${classId}`).delete();
+        }
+        history.push('/my-class');
     }
 
     let renderData = null;
@@ -45,6 +52,7 @@ const ClassDetail = ({ userObj }) => {
     return (
         <>
             <button onClick={toEditClass}>Edit</button>
+            <button onClick={deleteClass}>Delete</button>
             {renderData}
         </>
     )
