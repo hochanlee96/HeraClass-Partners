@@ -1,10 +1,14 @@
 import React, { useState, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import { dbService } from '../fbase';
+import * as authActions from '../store/actions/auth';
 
-const NewClassForm = ({ userObj }) => {
+
+const NewClassForm = () => {
+
     const history = useHistory();
+    const dispatch = useDispatch();
 
     const [titleInput, setTitleInput] = useState('');
     const [imageUrlInput, setImageUrlInput] = useState('');
@@ -55,24 +59,38 @@ const NewClassForm = ({ userObj }) => {
                 method: 'GET',
             })
         const data = await response.json();
+        console.log(data);
         setFetchedAddresses(data.addresses);
     }, [])
 
+
     const onSubmit = async (event) => {
         event.preventDefault();
-        await dbService.collection("classes").add({
-            title: titleInput,
-            imageUrl: imageUrlInput,
-            address: addressInput + " " + detailedAddressInput,
-            category: categoryList,
-            coordinates: { latitude: coordinates[1], longitude: coordinates[0] },
-            details: { tel: telInput },
-            followers: [],
-            postedBy: userObj.uid
+
+        const response = await fetch("http://localhost:3001/partners/classes", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                title: titleInput,
+                imageUrl: imageUrlInput,
+                address: addressInput + " " + detailedAddressInput,
+                category: categoryList,
+                coordinates: { latitude: coordinates[1], longitude: coordinates[0] },
+                details: { tel: telInput },
+            })
         });
-        history.push('/my-class')
+        const resData = await response.json();
+
+        if (resData.error === "not signed in") {
+            dispatch(authActions.logout());
+        } else {
+            const newClassId = resData.classId;
+            history.push(`/my-class/${newClassId}`);
+        }
     }
-    console.log(userObj.uid)
     const setCoordinatesHandler = (x, y) => {
         setCoordinates([x, y]);
     }

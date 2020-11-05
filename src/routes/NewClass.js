@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 
 import NewClassForm from '../components/NewClassForm';
 
-const NewClass = ({ userObj }) => {
+const NewClass = ({ userEmail }) => {
     return (
         <>
             <div>
                 Add New Class
             </div>
             <Link to="/">Home</Link>
-            <NewClassForm userObj={userObj} />
+            <NewClassForm userEmail={userEmail} />
         </>
     )
 }

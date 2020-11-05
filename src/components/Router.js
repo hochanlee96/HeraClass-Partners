@@ -1,5 +1,8 @@
-import React from "react";
-import { withRouter, Route, Switch } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from 'react-redux';
+import { withRouter, Route, Switch, Redirect } from "react-router-dom";
+
+import * as authActions from '../store/actions/auth';
 import Auth from '../routes/Auth';
 import Home from '../routes/Home';
 import Landing from '../routes/Landing';
@@ -9,28 +12,38 @@ import NewClass from '../routes/NewClass';
 import ClassDetail from '../routes/ClassDetail';
 import EditClass from '../routes/EditClass';
 
-const AppRouter = ({ isLoggedIn, userObj }) => {
+const AppRouter = () => {
+
+    const dispatch = useDispatch();
+    const userEmail = useSelector(state => state.auth.email);
+
+    useEffect(() => {
+        dispatch(authActions.authCheckState());
+    }, [dispatch])
+
     return (
         <>
-            {isLoggedIn && <Navigation userObj={userObj} />}
+            {userEmail !== "" && <Navigation userEmail={userEmail} />}
             <Switch>
-                {isLoggedIn ? (
+                {userEmail !== "" ? (
                     <>
                         <Route exact path="/">
-                            <Home userObj={userObj} />
+                            <Home />
                         </Route>
                         <Route exact path="/my-class">
-                            <MyClass userObj={userObj} />
+                            <MyClass />
                         </Route>
-                        <Route exact path="/my-class/new">
-                            <NewClass userObj={userObj} />
-                        </Route>
-                        <Route exact path="/my-class/:id">
-                            <ClassDetail userObj={userObj} />
-                        </Route>
-                        <Route exact path="/my-class/:id/edit">
-                            <EditClass userObj={userObj} />
-                        </Route>
+                        <Switch>
+                            <Route exact path="/my-class/new">
+                                <NewClass />
+                            </Route>
+                            <Route exact path="/my-class/:id">
+                                <ClassDetail />
+                            </Route>
+                            <Route exact path="/my-class/:id/edit">
+                                <EditClass />
+                            </Route>
+                        </Switch>
                     </>
                 ) : (
                         <>
@@ -40,6 +53,7 @@ const AppRouter = ({ isLoggedIn, userObj }) => {
                             <Route exact path="/auth">
                                 <Auth />
                             </Route>
+                            <Redirect to="/" />
                         </>
                     )}
             </Switch>

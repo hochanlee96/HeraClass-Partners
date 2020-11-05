@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { authService, dbService } from "../fbase";
+import { useDispatch } from 'react-redux';
 
-const Auth = props => {
+import * as authActions from '../store/actions/auth'
+
+const Auth = () => {
 
     const history = useHistory();
+    const dispatch = useDispatch();
 
     const [emailInput, setEmailInput] = useState('');
     const [usernameInput, setUsernameInput] = useState('');
@@ -25,22 +28,10 @@ const Auth = props => {
     const onSubmit = async (event) => {
         event.preventDefault();
         try {
-            let data;
             if (!isLogin) {
-                data = await authService.createUserWithEmailAndPassword(
-                    emailInput,
-                    passwordInput
-                );
-                const userId = data.user.uid;
-                dbService.collection("partners").doc(`${userId}`).set({ username: usernameInput })
+                dispatch(authActions.register(emailInput, usernameInput, passwordInput))
             } else {
-                data = await authService.signInWithEmailAndPassword(emailInput, passwordInput);
-                const userId = data.user.uid;
-                const isPartner = await dbService.collection("parnters").doc(`${userId}`).get().then(user => user);
-                if (!isPartner) {
-                    authService.signOut();
-                    setError("Not a Partner!");
-                }
+                dispatch(authActions.login(emailInput, passwordInput))
             }
             history.push('/');
         } catch (error) {

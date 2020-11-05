@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useRouteMatch, useHistory } from 'react-router-dom'
+import { useDispatch } from 'react-redux';
+import { useRouteMatch, useHistory } from 'react-router-dom';
 
-import { dbService } from '../fbase';
+import * as authActions from '../store/actions/auth';
+import Class from '../models/class';
 
-const EditClass = ({ userObj }) => {
+const EditClass = () => {
 
+    const dispatch = useDispatch();
     const match = useRouteMatch();
     const history = useHistory();
+
     const [classId, setClassId] = useState('');
     const [fetchedClass, setFetchedClass] = useState(null);
     const [titleInput, setTitleInput] = useState('');
@@ -25,21 +29,43 @@ const EditClass = ({ userObj }) => {
 
     const fetchClass = useCallback(async (classId) => {
         if (classId) {
-            const fetchedClass = await dbService.collection('classes').doc(`${classId}`).get();
-            //
-            setFetchedClass(fetchedClass.data());
-            //
-            setTitleInput(fetchedClass.data().title)
-            setImageUrlInput(fetchedClass.data().imageUrl)
-            setCategoryList(fetchedClass.data().category)
-            setTelInput(fetchedClass.data().details.tel)
+            const response = await fetch(`http://localhost:3001/partners/classes/${classId}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include'
+            });
+            const resData = await response.json();
+            if (resData.error === "not signed in") {
+                dispatch(authActions.logout());
+            } else {
 
+                setFetchedClass(new Class(
+                    resData._id,
+                    resData.title,
+                    resData.imageUrl,
+                    resData.address,
+                    [...resData.category],
+                    { ...resData.details },
+                    [...resData.followers],
+                    { ...resData.coordinates }
+                ));
+            }
         }
-    }, [])
+    }, [dispatch])
 
     useEffect(() => {
         fetchClass(classId)
     }, [classId, fetchClass])
+
+    useEffect(() => {
+        if (fetchedClass) {
+            setTitleInput(fetchedClass.title)
+            setImageUrlInput(fetchedClass.imageUrl)
+            setCategoryList(fetchedClass.category)
+            setTelInput(fetchedClass.details.tel)
+        }
+    }, [fetchedClass])
 
     const onChange = event => {
         const { name, value } = event.target
@@ -84,17 +110,29 @@ const EditClass = ({ userObj }) => {
 
     const onSubmit = async (event) => {
         event.preventDefault();
-        await dbService.collection("classes").doc(`${classId}`).update({
-            title: titleInput,
-            imageUrl: imageUrlInput,
-            // address: addressInput + " " + detailedAddressInput,
-            category: categoryList,
-            // coordinates: { latitude: coordinates[1], longitude: coordinates[0] },
-            details: { tel: telInput },
-            // followers: [],
-            // postedBy: userObj.uid
+
+        const response = await fetch(`http://localhost:3001/partners/classes/${classId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                title: titleInput,
+                imageUrl: imageUrlInput,
+                // address: addressInput + " " + detailedAddressInput,
+                category: categoryList,
+                // coordinates: { latitude: coordinates[1], longitude: coordinates[0] },
+                details: { tel: telInput },
+                // postedBy: userEmail
+            })
         });
-        history.push(`/my-class/${classId}`)
+        const resData = await response.json();
+        if (resData.error === "not signed in") {
+            dispatch(authActions.logout());
+        } else {
+            history.push(`/my-class/${classId}`)
+        }
     }
     const setCoordinatesHandler = (x, y) => {
         setCoordinates([x, y]);
@@ -139,7 +177,7 @@ const EditClass = ({ userObj }) => {
                 <label>imageUrl</label>
                 <input type="text" required value={imageUrlInput} name="imageUrl" onChange={onChange} placeholder="Image Url" />
                 <label>address</label>
-                <input type="text" required value={addressInput} name="address" onChange={onChange} placeholder="Address" />
+                <input type="text" value={addressInput} name="address" onChange={onChange} placeholder="Address" />
                 <input type="button" value="Search Address" onClick={() => searchAddress(addressInput)} />
                 {coordinates && (<><label>Detailed Address</label>
                     <input type="text" required value={detailedAddressInput} name="detailedAddress" onChange={onChange} placeholder="Detailed Address" /></>)}

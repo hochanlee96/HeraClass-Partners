@@ -1,12 +1,17 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { authService } from '../fbase';
+import { useDispatch } from 'react-redux';
+
+import * as authActions from '../store/actions/auth';
 
 const Navigation = props => {
 
+
     const history = useHistory();
+    const dispatch = useDispatch();
+
     const logOutClick = () => {
-        authService.signOut();
+        dispatch(authActions.logout());
         history.push("/");
     };
     return (
@@ -14,7 +19,7 @@ const Navigation = props => {
             <div>
                 Navigation
         </div>
-            {props.userObj ? <p onClick={logOutClick}>Log Out</p> : null}
+            {props.userEmail ? <p onClick={logOutClick}>Log Out</p> : null}
         </>
     )
 }
