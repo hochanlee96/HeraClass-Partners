@@ -82,8 +82,10 @@ const ClassDetail = () => {
             if (resData.error === "not signed in") {
                 dispatch(authActions.logout());
             }
+            else {
+                history.push('/my-class');
+            }
         }
-        history.push('/my-class');
     }
 
     let renderData = null;

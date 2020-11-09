@@ -27,9 +27,6 @@ const AppRouter = () => {
             <Switch>
                 {userEmail !== "" ? (
                     <>
-                        <Route exact path="/">
-                            <Home />
-                        </Route>
                         <Route exact path="/my-class">
                             <MyClass />
                         </Route>
@@ -44,14 +41,21 @@ const AppRouter = () => {
                                 <EditClass />
                             </Route>
                         </Switch>
+                        <Route exact path="/">
+                            <Home />
+                        </Route>
+                        <Redirect to="/" />
                     </>
                 ) : (
                         <>
                             <Route exact path="/">
                                 <Landing />
                             </Route>
-                            <Route exact path="/auth">
-                                <Auth />
+                            <Route exact path="/sign-up">
+                                <Auth isLogin={false} />
+                            </Route>
+                            <Route exact path="/login">
+                                <Auth isLogin={true} />
                             </Route>
                             <Redirect to="/" />
                         </>

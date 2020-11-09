@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 
 import * as authActions from '../store/actions/auth'
 
-const Auth = () => {
+const Auth = props => {
 
     const history = useHistory();
     const dispatch = useDispatch();
@@ -12,7 +12,7 @@ const Auth = () => {
     const [emailInput, setEmailInput] = useState('');
     const [usernameInput, setUsernameInput] = useState('');
     const [passwordInput, setPasswordInput] = useState('');
-    const [isLogin, setIsLogin] = useState(true);
+    const [isLogin, setIsLogin] = useState(props.isLogin);
     const [error, setError] = useState('');
 
     const onInputChange = event => {
@@ -29,9 +29,9 @@ const Auth = () => {
         event.preventDefault();
         try {
             if (!isLogin) {
-                dispatch(authActions.register(emailInput, usernameInput, passwordInput))
+                await dispatch(authActions.register(emailInput, usernameInput, passwordInput))
             } else {
-                dispatch(authActions.login(emailInput, passwordInput))
+                await dispatch(authActions.login(emailInput, passwordInput))
             }
             history.push('/');
         } catch (error) {
@@ -49,14 +49,15 @@ const Auth = () => {
             <div>
                 Auth Page
             </div>
-            <p onClick={LogInOrSignUp}>{isLogin ? "Log In" : "Sign Up"}</p>
-            {error ? <p>{error}</p> : null}
+            <p>{isLogin ? "Log In" : "Sign Up"}</p>
+            {error}
             <form onSubmit={onSubmit}>
                 <input type="email" required placeholder="Email" value={emailInput} name="email" onChange={onInputChange} />
                 {isLogin ? null : <input type="text" required placeholder="Username" value={usernameInput} name="username" onChange={onInputChange} />}
                 <input type="password" required placeholder="Password" value={passwordInput} name="password" onChange={onInputChange} />
                 <input type="submit" />
             </form>
+            <p onClick={LogInOrSignUp}>{isLogin ? "Not a Partner? Sign Up!" : "Already a Partner? Log In!"}</p>
         </>
     )
 }

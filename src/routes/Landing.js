@@ -7,7 +7,12 @@ const Landing = () => {
             <div>
                 Landing Page
         </div>
-            <Link to="/auth">Become a Partner</Link>
+            <div>
+                <Link to="/sign-up">Become a Partner</Link>
+            </div>
+            <div>
+                <Link to="/login">Log In</Link>
+            </div>
         </>
     )
 }
