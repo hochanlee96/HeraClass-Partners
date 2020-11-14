@@ -34,7 +34,7 @@ const StudioDetail = () => {
             }
 
             const resData = await response.json();
-            console.log('resdata', resData)
+
             if (resData.error === "not signed in") {
                 dispatch(authActions.logout());
             } else {

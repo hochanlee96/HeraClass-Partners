@@ -103,15 +103,10 @@ const EditStudio = () => {
     }
 
     const map = useCallback(async (address) => {
-        // const response = await
-        //     fetch(`https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=${address}&X-NCP-APIGW-API-KEY-ID=httryobi1m&X-NCP-APIGW-API-KEY=NuuaE4v1PftZnYOqx5sEcwyFMIZpQXzfJ5WdCCfG&Accept=application/json`, {
-        //         method: 'GET',
-        //     })
         const response = await fetch(`http://localhost:3001/map/${address}`, {
             credentials: 'include'
         })
         const data = await response.json();
-        console.log('data', data);
         setIsValidAddress(true);
         setFetchedAddresses(data);
     }, [])
@@ -146,7 +141,6 @@ const EditStudio = () => {
             })
         });
         const resData = await response.json();
-        console.log(resData);
         if (resData.error === "not signed in") {
             dispatch(authActions.logout());
         } else {
@@ -174,8 +168,6 @@ const EditStudio = () => {
         }}>{addressObj.roadAddress}</p>)
     }
 
-    console.log(addressInput);
-
     let renderData = null;
     if (fetchedStudio) {
         renderData = (
@@ -188,7 +180,6 @@ const EditStudio = () => {
             </>
         )
     }
-    console.log('fetched', fetchedAddresses);
     return (
         <>
             {renderData}
