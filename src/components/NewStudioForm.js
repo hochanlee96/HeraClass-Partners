@@ -5,7 +5,7 @@ import { useHistory } from 'react-router-dom';
 import * as authActions from '../store/actions/auth';
 
 
-const NewClassForm = () => {
+const NewStudioForm = () => {
 
     const history = useHistory();
     const dispatch = useDispatch();
@@ -16,9 +16,12 @@ const NewClassForm = () => {
     const [detailedAddressInput, setDetailedAddressInput] = useState('');
     const [coordinates, setCoordinates] = useState(null);
     const [fetchedAddresses, setFetchedAddresses] = useState(null);
+    const [fetched, setFetched] = useState(false);
     const [categoryInput, setCategoryInput] = useState('');
     const [categoryList, setCategoryList] = useState([]);
     const [telInput, setTelInput] = useState('');
+    const [error, setError] = useState('');
+    const [addressObj, setAddressObj] = useState(null);
 
     const onChange = event => {
         const { name, value } = event.target
@@ -48,26 +51,41 @@ const NewClassForm = () => {
         const updatedList = categoryList.filter(cat => cat !== id);
         setCategoryList(updatedList);
     }
+    const resetAddress = () => {
+        setAddressInput('');
+        setDetailedAddressInput('');
+        setError('');
+        setCoordinates(null);
+        setFetchedAddresses(null);
+        setFetched(false);
+        setAddressObj(null);
+    }
 
     const searchAddress = address => {
         map(address);
     }
 
     const map = useCallback(async (address) => {
-        const response = await
-            fetch(`https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=${address}&X-NCP-APIGW-API-KEY-ID=httryobi1m&X-NCP-APIGW-API-KEY=NuuaE4v1PftZnYOqx5sEcwyFMIZpQXzfJ5WdCCfG&Accept=application/json`, {
-                method: 'GET',
-            })
-        const data = await response.json();
-        console.log(data);
-        setFetchedAddresses(data.addresses);
+        if (address !== '') {
+            const response = await
+                fetch(`http://localhost:3001/map/${address}`, {
+                    credentials: 'include'
+                })
+            const data = await response.json();
+            console.log(data);
+            if (data.length === 0) {
+                setError("no such address is found")
+            }
+            setFetchedAddresses(data);
+            setFetched(true);
+        }
     }, [])
 
 
     const onSubmit = async (event) => {
         event.preventDefault();
 
-        const response = await fetch("http://localhost:3001/partners/classes", {
+        const response = await fetch("http://localhost:3001/partners/studios", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -76,9 +94,10 @@ const NewClassForm = () => {
             body: JSON.stringify({
                 title: titleInput,
                 imageUrl: imageUrlInput,
-                address: addressInput + " " + detailedAddressInput,
+                address: addressObj.roadAddress + " " + detailedAddressInput,
+                bigAddress: addressObj.addressElements[0].shortName + " " + addressObj.addressElements[1].shortName + " " + addressObj.addressElements[2].shortName,
                 category: categoryList,
-                coordinates: { latitude: coordinates[1], longitude: coordinates[0] },
+                coordinates: { latitude: addressObj.y, longitude: addressObj.x },
                 details: { tel: telInput },
             })
         });
@@ -87,8 +106,8 @@ const NewClassForm = () => {
         if (resData.error === "not signed in") {
             dispatch(authActions.logout());
         } else {
-            const newClassId = resData.classId;
-            history.push(`/my-class/${newClassId}`);
+            const newStudioId = resData.studioId;
+            history.push(`/my-studios/${newStudioId}`);
         }
     }
     const setCoordinatesHandler = (x, y) => {
@@ -108,9 +127,9 @@ const NewClassForm = () => {
         addressData = fetchedAddresses.map(addressObj => <p key={addressObj.roadAddress} onClick={() => {
             setCoordinatesHandler(addressObj.x, addressObj.y)
             setAddressInput(addressObj.roadAddress)
+            setAddressObj(addressObj);
         }}>{addressObj.roadAddress}</p>)
     }
-
     return (
         <>
             <form onSubmit={onSubmit}>
@@ -121,6 +140,8 @@ const NewClassForm = () => {
                 <label>address</label>
                 <input type="text" required value={addressInput} name="address" onChange={onChange} placeholder="Address" />
                 <input type="button" value="Search Address" onClick={() => searchAddress(addressInput)} />
+                {fetched ? <input type="button" value="Reset Address" onClick={resetAddress} /> : null}
+                {error !== '' ? <p>{error}</p> : null}
                 {coordinates && (<><label>Detailed Address</label>
                     <input type="text" required value={detailedAddressInput} name="detailedAddress" onChange={onChange} placeholder="Detailed Address" /></>)}
                 <label>category</label>
@@ -142,4 +163,4 @@ const NewClassForm = () => {
     )
 }
 
-export default NewClassForm;
+export default NewStudioForm;

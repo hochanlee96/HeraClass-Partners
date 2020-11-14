@@ -3,27 +3,27 @@ import { useDispatch } from 'react-redux'
 import { Link, useRouteMatch, useHistory } from 'react-router-dom';
 
 import * as authActions from '../store/actions/auth';
-import Class from '../models/class';
+import Studio from '../models/studio';
 
 
-const ClassDetail = () => {
+const StudioDetail = () => {
 
     const dispatch = useDispatch();
 
-    const [classId, setClassId] = useState('');
-    const [fetchedClass, setFetchedClass] = useState(null);
+    const [studioId, setStudioId] = useState('');
+    const [fetchedStudio, setFetchedStudio] = useState(null);
     const match = useRouteMatch();
     const history = useHistory();
 
     useEffect(() => {
-        setClassId(match.params.id);
+        setStudioId(match.params.id);
     }, [match])
 
-    const fetchClass = useCallback(async classId => {
+    const fetchStudio = useCallback(async studioId => {
         try {
 
             //서버이용해서 fetch class
-            const response = await fetch(`http://localhost:3001/partners/classes/${classId}`, {
+            const response = await fetch(`http://localhost:3001/partners/studios/${studioId}`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -39,7 +39,7 @@ const ClassDetail = () => {
                 dispatch(authActions.logout());
             } else {
 
-                const classData = new Class(
+                const studioData = new Studio(
                     resData._id,
                     resData.title,
                     resData.imageUrl,
@@ -49,7 +49,7 @@ const ClassDetail = () => {
                     [...resData.followers],
                     { ...resData.coordinates }
                 );
-                setFetchedClass(classData)
+                setFetchedStudio(studioData)
             }
         } catch (error) {
             throw error;
@@ -57,18 +57,18 @@ const ClassDetail = () => {
     }, [dispatch])
 
     useEffect(() => {
-        if (classId !== '') {
-            fetchClass(classId)
+        if (studioId !== '') {
+            fetchStudio(studioId)
         }
-    }, [classId, fetchClass])
+    }, [studioId, fetchStudio])
 
-    const toEditClass = () => {
-        history.push(`/my-class/${classId}/edit`);
+    const toEditStudio = () => {
+        history.push(`/my-studios/${studioId}/edit`);
     }
 
-    const deleteClass = async () => {
-        if (classId) {
-            const response = await fetch(`http://localhost:3001/partners/classes/${classId}`, {
+    const deleteStudio = async () => {
+        if (studioId) {
+            const response = await fetch(`http://localhost:3001/partners/studios/${studioId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -83,32 +83,32 @@ const ClassDetail = () => {
                 dispatch(authActions.logout());
             }
             else {
-                history.push('/my-class');
+                history.push('/my-studios');
             }
         }
     }
 
     let renderData = null;
-    if (fetchedClass) {
+    if (fetchedStudio) {
         renderData = (
             <>
-                <div>title: {fetchedClass.title} </div>
-                <img src={fetchedClass.imageUrl} alt="" />
-                <div>address: {fetchedClass.address}</div>
-                <div>tel: {fetchedClass.details.tel}</div>
-                <div>{fetchedClass.category.map(cat => <p key={cat}>{cat}</p>)}</div>
+                <div>title: {fetchedStudio.title} </div>
+                <img src={fetchedStudio.imageUrl} alt="" />
+                <div>address: {fetchedStudio.address}</div>
+                <div>tel: {fetchedStudio.details.tel}</div>
+                <div>{fetchedStudio.category.map(cat => <p key={cat}>{cat}</p>)}</div>
             </>
         )
     }
 
     return (
         <>
-            <Link to={'/my-class'}>My Class</Link>
-            <button onClick={toEditClass}>Edit</button>
-            <button onClick={deleteClass}>Delete</button>
+            <Link to={'/my-studios'}>My Studios</Link>
+            <button onClick={toEditStudio}>Edit</button>
+            <button onClick={deleteStudio}>Delete</button>
             {renderData}
         </>
     )
 }
 
-export default ClassDetail;
+export default StudioDetail;

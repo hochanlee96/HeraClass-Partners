@@ -7,10 +7,10 @@ import Auth from '../routes/Auth';
 import Home from '../routes/Home';
 import Landing from '../routes/Landing';
 import Navigation from './Navigation';
-import MyClass from '../routes/MyClass';
-import NewClass from '../routes/NewClass';
-import ClassDetail from '../routes/ClassDetail';
-import EditClass from '../routes/EditClass';
+import MyStudios from '../routes/MyStudios';
+import NewStudio from '../routes/NewStudio';
+import StudioDetail from '../routes/StudioDetail';
+import EditStudio from '../routes/EditStudio';
 
 const AppRouter = () => {
 
@@ -27,18 +27,18 @@ const AppRouter = () => {
             <Switch>
                 {userEmail !== "" ? (
                     <>
-                        <Route exact path="/my-class">
-                            <MyClass />
+                        <Route exact path="/my-studios">
+                            <MyStudios />
                         </Route>
                         <Switch>
-                            <Route exact path="/my-class/new">
-                                <NewClass />
+                            <Route exact path="/my-studios/new">
+                                <NewStudio />
                             </Route>
-                            <Route exact path="/my-class/:id">
-                                <ClassDetail />
+                            <Route exact path="/my-studios/:id">
+                                <StudioDetail />
                             </Route>
-                            <Route exact path="/my-class/:id/edit">
-                                <EditClass />
+                            <Route exact path="/my-studios/:id/edit">
+                                <EditStudio />
                             </Route>
                         </Switch>
                         <Route exact path="/">

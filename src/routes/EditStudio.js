@@ -3,18 +3,19 @@ import { useDispatch } from 'react-redux';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 
 import * as authActions from '../store/actions/auth';
-import Class from '../models/class';
+import Studio from '../models/studio';
 
-const EditClass = () => {
+const EditStudio = () => {
 
     const dispatch = useDispatch();
     const match = useRouteMatch();
     const history = useHistory();
 
-    const [classId, setClassId] = useState('');
-    const [fetchedClass, setFetchedClass] = useState(null);
+    const [studioId, setStudioId] = useState('');
+    const [fetchedStudio, setFetchedStudio] = useState(null);
     const [titleInput, setTitleInput] = useState('');
     const [imageUrlInput, setImageUrlInput] = useState('');
+    const [bigAddress, setBigAddress] = useState('');
     const [addressInput, setAddressInput] = useState('');
     const [detailedAddressInput, setDetailedAddressInput] = useState('');
     const [coordinates, setCoordinates] = useState(null);
@@ -22,14 +23,15 @@ const EditClass = () => {
     const [categoryInput, setCategoryInput] = useState('');
     const [categoryList, setCategoryList] = useState([]);
     const [telInput, setTelInput] = useState('');
+    const [isValidAddress, setIsValidAddress] = useState(false);
 
     useEffect(() => {
-        setClassId(match.params.id);
+        setStudioId(match.params.id);
     }, [match])
 
-    const fetchClass = useCallback(async (classId) => {
-        if (classId) {
-            const response = await fetch(`http://localhost:3001/partners/classes/${classId}`, {
+    const fetchStudio = useCallback(async (studioId) => {
+        if (studioId) {
+            const response = await fetch(`http://localhost:3001/partners/studios/${studioId}`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -40,7 +42,7 @@ const EditClass = () => {
                 dispatch(authActions.logout());
             } else {
 
-                setFetchedClass(new Class(
+                setFetchedStudio(new Studio(
                     resData._id,
                     resData.title,
                     resData.imageUrl,
@@ -55,17 +57,18 @@ const EditClass = () => {
     }, [dispatch])
 
     useEffect(() => {
-        fetchClass(classId)
-    }, [classId, fetchClass])
+        fetchStudio(studioId)
+    }, [studioId, fetchStudio])
 
     useEffect(() => {
-        if (fetchedClass) {
-            setTitleInput(fetchedClass.title)
-            setImageUrlInput(fetchedClass.imageUrl)
-            setCategoryList(fetchedClass.category)
-            setTelInput(fetchedClass.details.tel)
+        if (fetchedStudio) {
+            setTitleInput(fetchedStudio.title)
+            setImageUrlInput(fetchedStudio.imageUrl)
+            setCategoryList(fetchedStudio.category)
+            setTelInput(fetchedStudio.details.tel)
         }
-    }, [fetchedClass])
+    }, [fetchedStudio])
+
 
     const onChange = event => {
         const { name, value } = event.target
@@ -100,18 +103,31 @@ const EditClass = () => {
     }
 
     const map = useCallback(async (address) => {
-        const response = await
-            fetch(`https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=${address}&X-NCP-APIGW-API-KEY-ID=httryobi1m&X-NCP-APIGW-API-KEY=NuuaE4v1PftZnYOqx5sEcwyFMIZpQXzfJ5WdCCfG&Accept=application/json`, {
-                method: 'GET',
-            })
+        // const response = await
+        //     fetch(`https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=${address}&X-NCP-APIGW-API-KEY-ID=httryobi1m&X-NCP-APIGW-API-KEY=NuuaE4v1PftZnYOqx5sEcwyFMIZpQXzfJ5WdCCfG&Accept=application/json`, {
+        //         method: 'GET',
+        //     })
+        const response = await fetch(`http://localhost:3001/map/${address}`, {
+            credentials: 'include'
+        })
         const data = await response.json();
-        setFetchedAddresses(data.addresses);
+        console.log('data', data);
+        setIsValidAddress(true);
+        setFetchedAddresses(data);
     }, [])
 
     const onSubmit = async (event) => {
         event.preventDefault();
+        let addressObj = null;
+        if (isValidAddress) {
+            addressObj = {
+                bigAddress: bigAddress,
+                address: addressInput + " " + detailedAddressInput,
+                coordinates: { latitude: coordinates[1], longitude: coordinates[0] }
+            }
+        }
 
-        const response = await fetch(`http://localhost:3001/partners/classes/${classId}`, {
+        const response = await fetch(`http://localhost:3001/partners/studios/${studioId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -120,18 +136,21 @@ const EditClass = () => {
             body: JSON.stringify({
                 title: titleInput,
                 imageUrl: imageUrlInput,
+                // bigAddress: bigAddress,
                 // address: addressInput + " " + detailedAddressInput,
                 category: categoryList,
                 // coordinates: { latitude: coordinates[1], longitude: coordinates[0] },
                 details: { tel: telInput },
+                ...addressObj
                 // postedBy: userEmail
             })
         });
         const resData = await response.json();
+        console.log(resData);
         if (resData.error === "not signed in") {
             dispatch(authActions.logout());
         } else {
-            history.push(`/my-class/${classId}`)
+            history.push(`/my-studios/${studioId}`)
         }
     }
     const setCoordinatesHandler = (x, y) => {
@@ -149,25 +168,27 @@ const EditClass = () => {
     let addressData;
     if (fetchedAddresses) {
         addressData = fetchedAddresses.map(addressObj => <p key={addressObj.roadAddress} onClick={() => {
-            setCoordinatesHandler(addressObj.x, addressObj.y)
-            setAddressInput(addressObj.roadAddress)
+            setCoordinatesHandler(addressObj.x, addressObj.y);
+            setAddressInput(addressObj.roadAddress);
+            setBigAddress(addressObj.addressElements[0].shortName + " " + addressObj.addressElements[1].shortName + " " + addressObj.addressElements[2].shortName)
         }}>{addressObj.roadAddress}</p>)
     }
 
+    console.log(addressInput);
 
     let renderData = null;
-    if (fetchedClass) {
+    if (fetchedStudio) {
         renderData = (
             <>
-                <div>title: {fetchedClass.title} </div>
-                <img src={fetchedClass.imageUrl} alt="" />
-                <div>address: {fetchedClass.address}</div>
-                <div>tel: {fetchedClass.details.tel}</div>
-                <div>{fetchedClass.category.map(cat => <p key={cat}>{cat}</p>)}</div>
+                <div>title: {fetchedStudio.title} </div>
+                <img src={fetchedStudio.imageUrl} alt="" />
+                <div>address: {fetchedStudio.address}</div>
+                <div>tel: {fetchedStudio.details.tel}</div>
+                <div>{fetchedStudio.category.map(cat => <p key={cat}>{cat}</p>)}</div>
             </>
         )
     }
-
+    console.log('fetched', fetchedAddresses);
     return (
         <>
             {renderData}
@@ -196,4 +217,4 @@ const EditClass = () => {
     )
 }
 
-export default EditClass;
+export default EditStudio;
