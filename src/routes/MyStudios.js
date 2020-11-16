@@ -14,7 +14,7 @@ const MyStudios = () => {
     const dispatch = useDispatch();
     const history = useHistory();
 
-    const fetchMyStudios = useCallback(async studioId => {
+    const fetchMyStudios = useCallback(async () => {
         try {
 
             //서버이용해서 fetch class
@@ -75,7 +75,7 @@ const MyStudios = () => {
     return (
         <>
             <div>
-                My Studios` Page
+                My Studios
         </div>
             <Link to="/">Home</Link>
             <Link to='/my-studios/new'>Add New Studio</Link>
